@@ -11,7 +11,7 @@ public:
     //Перегруженная функция расчета базовой стратегии. Возвращает контейнер-словарь QMap,
     //в котором ключ - формат файла
     //значение - занимаемое им пространство в процентах
-    FileData calculate(QString &dir) override;
+    FileData calculate(QString dir) override;
 private:
     //отдельная функция для рекурсивного подсчета. (см .cpp файл)
     void calculateFolder(QString folderPath, QMap<QString,uint64_t> *fileExtMap);

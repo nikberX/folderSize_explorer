@@ -9,7 +9,7 @@ class CalculationStrategy
 {
 public:
     virtual ~CalculationStrategy() {};
-    virtual FileData calculate(QString &dir) = 0;
+    virtual FileData calculate(QString dir) = 0;
 };
 
 #endif // CALCULATIONSTRATEGY_H

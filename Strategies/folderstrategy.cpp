@@ -1,7 +1,25 @@
 #include "folderstrategy.h"
-
-FileData FolderStrategy::calculate(QString &dirStr)
+#include <iostream>
+FileData FolderStrategy::calculate(QString dirStr)
 {
+
+
+    //Объект QFileInfo для удобной работы с поданной дирректорией
+    QFileInfo path(dirStr);
+
+    //Пустой контейнер QMap для записи результата работы функции
+    FileData resultData(0,QMap<QString,double>());
+
+    //Проверка что путь корректный (набран правильно, существует)
+    if (!path.exists()) {
+        std::cout<<path.absoluteFilePath().toStdString()<<std::endl;
+        throw std::runtime_error("PATH ERROR");
+    }
+
+    //Проверка на возможность открыть файл или папку (если файл защищен то будет False)
+    if (!path.isReadable()) {
+        throw std::runtime_error("PERMISSION ERROR");
+    }
     //Проверяем что подали не пустую строку
     if (dirStr.isEmpty()) {
         throw std::runtime_error("EMPTY DIRECTORY");
@@ -12,21 +30,7 @@ FileData FolderStrategy::calculate(QString &dirStr)
             dirStr.append('/');
         }
     }
-    //Объект QFileInfo для удобной работы с поданной дирректорией
-    QFileInfo path(dirStr);
-
-    //Пустой контейнер QMap для записи результата работы функции
-    FileData resultData(0,QMap<QString,double>());
-
-    //Проверка что путь корректный (набран правильно, существует)
-    if (!path.exists()) {
-        throw std::runtime_error("PATH ERROR");
-    }
-
-    //Проверка на возможность открыть файл или папку (если файл защищен то будет False)
-    if (!path.isReadable()) {
-        throw std::runtime_error("PERMISSION ERROR");
-    }
+    path = QFileInfo(dirStr);
     //Контейнер QMap который будет хранить в себе пары расширение - место
     //Динамический, тк используется отдельная рекурсивная функция, в которую передается контейнер
     QMap<QString,uint64_t> *folderNameMap = new QMap<QString,uint64_t>();
@@ -87,7 +91,8 @@ FileData FolderStrategy::calculate(QString &dirStr)
     delete folderNameMap;
     return resultData;
 }
-
+//Аналогично счету по типам файлов, вес директории нужно считать рекурсивно.
+//mapKey отвечает за ключ контейнера QMap, в который будет добавляться общий размер
 void FolderStrategy::calculateFolder(QString folderPath, QMap<QString, uint64_t> *folderNameMap, QString mapKey)
 {
     QDir directory(folderPath);
@@ -100,7 +105,7 @@ void FolderStrategy::calculateFolder(QString folderPath, QMap<QString, uint64_t>
             calculateFolder(fpath, folderNameMap, mapKey);
         }
 
-        //цикл по файлам в папке
+        //цикл по файлам в папке, считаем размер.
         foreach(QFileInfo file, directory.entryInfoList(QDir::NoDotAndDotDot | QDir::Files| QDir::System | QDir::Hidden )) {
             folderNameMap->operator[](mapKey) += file.size();
         }

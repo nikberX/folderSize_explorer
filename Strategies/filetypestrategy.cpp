@@ -1,18 +1,9 @@
 #include "filetypestrategy.h"
 #include "exception"
 #include <iostream>
-FileData FileTypeStrategy::calculate(QString &dirStr)
+FileData FileTypeStrategy::calculate(QString dirStr)
 {
-    //Проверяем что подали не пустую строку
-    if (dirStr.isEmpty()) {
-        throw std::runtime_error("EMPTY DIRECTORY");
-    } else {
-        //В конце строки должен стоять слеш (Если директория будет указывать на папку без слеша, например
-        // D:/test/1 то не сработает функция проверки папки на пустую (dir().isEmpty())
-        if (dirStr[dirStr.length()-1] != '/') {
-            dirStr.append('/');
-        }
-    }
+
     //Объект QFileInfo для удобной работы с поданной дирректорией
     QFileInfo path(dirStr);
 
@@ -22,6 +13,7 @@ FileData FileTypeStrategy::calculate(QString &dirStr)
 
     //Проверка что путь корректный (набран правильно, существует)
     if (!path.exists()) {
+        std::cout<<path.absoluteFilePath().toStdString()<<std::endl;
         throw std::runtime_error("PATH ERROR");
     }
 
@@ -29,6 +21,17 @@ FileData FileTypeStrategy::calculate(QString &dirStr)
     if (!path.isReadable()) {
         throw std::runtime_error("PERMISSION ERROR");
     }
+    //Проверяем что подали не пустую строку
+    if (dirStr.isEmpty()) {
+        throw std::runtime_error("EMPTY DIRECTORY STRING");
+    } else {
+        //В конце строки должен стоять слеш (Если директория будет указывать на папку без слеша, например
+        // D:/test/1 то не сработает функция проверки папки на пустую (dir().isEmpty())
+        if (dirStr[dirStr.length()-1] != '/') {
+            dirStr.append('/');
+        }
+    }
+    path = QFileInfo(dirStr);
     //Контейнер QMap который будет хранить в себе пары расширение - место
     //Динамический, тк используется отдельная рекурсивная функция, в которую передается контейнер
     QMap<QString,uint64_t> *fileExtMap = new QMap<QString,uint64_t>();
@@ -91,6 +94,8 @@ FileData FileTypeStrategy::calculate(QString &dirStr)
     } else {
         //На вход пришла не папка а путь к файлу.
         QString filenameExt;
+        //Убираем лишний слеш с конца,тк приводит к ошибке
+        path = QFileInfo(path.absoluteFilePath().left(path.absoluteFilePath().lastIndexOf('/')));
         int indexOfDot = path.fileName().lastIndexOf('.');
         if (indexOfDot == -1) {
             filenameExt = "unknown";

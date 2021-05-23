@@ -23,5 +23,9 @@ FileData SizeCalculator::Calculate(QString &path) {
     if (m_strategy == nullptr) {
         throw std::runtime_error("No strategy is set");
     }
-    return m_strategy->calculate(path);
+    try {
+        return m_strategy->calculate(path);
+    }  catch (std::runtime_error &exc) {
+        throw exc;
+    }
 }
