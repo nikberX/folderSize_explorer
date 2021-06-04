@@ -1,12 +1,16 @@
 #include "sizecalculator.h"
 
+SizeCalculator *SizeCalculator::getInstance()
+{
+    if (instance==nullptr) {
+        instance = new SizeCalculator();
+    }
+    return instance;
+}
+
 SizeCalculator::SizeCalculator()
 {
     m_strategy = nullptr;
-}
-SizeCalculator::SizeCalculator(CalculationStrategy *strategy)
-{
-    m_strategy = strategy;
 }
 //в паттерне стратегия мы не должны управлять временем жизни стратегии
 SizeCalculator::~SizeCalculator()
@@ -25,7 +29,7 @@ FileData SizeCalculator::Calculate(QString &path) {
     }
     try {
         return m_strategy->calculate(path);
-    }  catch (std::runtime_error &exc) {
+    } catch (std::runtime_error &exc) {
         throw exc;
     }
 }

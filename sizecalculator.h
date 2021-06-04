@@ -7,17 +7,19 @@
 class SizeCalculator
 {
 public:
-    //конструктор по умолчанию
-    SizeCalculator();
+    static SizeCalculator* getInstance();
+    SizeCalculator(SizeCalculator&) = delete;
+    void operator=(const SizeCalculator&) = delete;
     //деструтор (см. .cpp файл)
     ~SizeCalculator();
-    //конструктор с абстрактной стратегией
-    SizeCalculator(CalculationStrategy *strategy);
     //Функция для смены стратегии
     void setCalculationStrategy(CalculationStrategy *strategy);
     //посчитать размер в зависимости от заданной стратегии
     FileData Calculate(QString &path);
+protected:
+    static SizeCalculator *instance;
 private:
+    SizeCalculator();
     //член-данное, которое хранит указатель на абстрактную стратегию, в которую мы можем помещать конкретные стратегии
     CalculationStrategy *m_strategy;
 };
