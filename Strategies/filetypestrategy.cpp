@@ -86,7 +86,11 @@ FileData FileTypeStrategy::calculate(QString dirStr)
         foreach(QString typeStr,typesStringList) {
             uint64_t sizeOfExt = fileExtMap->operator[](typeStr) * 100;
             double percents = double(sizeOfExt)/totalSize;
-            resultData.map[typeStr] =percents;
+            if (percents < 0.008) {
+                resultData.map["others"] +=percents;
+            } else {
+                resultData.map[typeStr] =percents;
+            }
         }
 
         delete fileExtMap;
