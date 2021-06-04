@@ -2,6 +2,7 @@
 
 SizeCalculator *SizeCalculator::getInstance()
 {
+    //если объект ещё не был создан, создаем новый
     if (instance==nullptr) {
         instance = new SizeCalculator();
     }
@@ -22,7 +23,6 @@ void SizeCalculator::setCalculationStrategy(CalculationStrategy *strategy)
     m_strategy = strategy;
 }
 //посчитать размер
-//здесь можно отсеять маленькие проценты в QMap<>. Пока что возвращает полный список
 FileData SizeCalculator::Calculate(QString &path) {
     if (m_strategy == nullptr) {
         throw std::runtime_error("No strategy is set");

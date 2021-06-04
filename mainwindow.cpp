@@ -3,28 +3,33 @@
 #include "QSplitter"
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
-
+    //Создаем конкретные объекты стратегий
     folderStrategy = new FolderStrategy();
     fileStrategy = new FileTypeStrategy();
-
+    //Задаем файловую группировку как группировку по умолчанию
     SizeCalculator::getInstance()->setCalculationStrategy(fileStrategy);
 
+    //Создаем объект панели меню
     menuBar = new QMenuBar();
-    //viewMenuBar = new QMenuBar(this);
-    //strategyMenuBar->setGeometry(0,0,800,20);
+    //привязываем объект к окну
     setMenuBar(menuBar);
+    //задаем геометрию окна
     setGeometry(100,100,800,500);
+    //создаем разделы меню группировка и вид
     changeStrategyMenu = new QMenu("Группировка");
     changeViewMenu = new QMenu("Вид");
 
+    //Действия в разделе группировка
     fileStrategyAction = new QAction("По файлам");
     folderStrategyAction = new QAction("По папкам");
-
+    //Привязываем действия к разделу
     changeStrategyMenu->addAction(fileStrategyAction);
     changeStrategyMenu->addAction(folderStrategyAction);
 
+    //Добавляем в панель меню меню группировки
     menuBar->addMenu(changeStrategyMenu);
 
+    //Аналогичные действия с разделом меню "Вид"
     listViewAction = new QAction("Таблица");
     circleChartViewAction = new QAction("Столбчатая диаграмма");
     barChartViewAction = new QAction("Круговая диаграмма");
@@ -35,110 +40,95 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     menuBar->addMenu(changeViewMenu);
 
+    //Домашняя папка как директория по-умолчанию
     QString homePath = QDir::homePath();
-    // Определим  файловой системы:
+
+
+    //Создаем модель файловой системы
     dirModel =  new QFileSystemModel(this);
+    //задаем фильты (показывать все директории, не показывать файлы . и ..
     dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
+    //задаем домашнюю папку как корневую для модели
     dirModel->setRootPath(homePath);
 
+    //создаем виджеты для отображения моделей
     treeView = new QTreeView();
     listView = new QTableView();
 
+    //создаем модель для отображения данных подсчета
     fileModel = new FileExplorerModel(this);
-    fileModel->updateData("D:/2021 minecraft");
+    //Виджет-контейнер для красивого размещения видов
     QSplitter *splitter = new QSplitter(this);
 
-
-    qDebug() << homePath;
+    //привязываем модели к виду
     treeView->setModel(dirModel);
-
+    listView->setModel(fileModel);
+    //добавляем виджеты вида в QSplitter
     splitter->addWidget(treeView);
     splitter->addWidget(listView);
 
+    //Делаем виджет QSplitter центральным
     setCentralWidget(splitter);
 
-    qDebug() << "win created\n";
-
+    //Связываем сигналы-слоты кнопок меню.
+    //для группировок
     connect(fileStrategyAction    , SIGNAL(triggered()), this, SLOT(onFileStrategyClick()  ) );
     connect(folderStrategyAction  , SIGNAL(triggered()), this, SLOT(onFolderStrategyClick()) );
-
+    //для отображения
     connect(listViewAction          , SIGNAL(triggered()), this, SLOT(onlistViewClick()));
     connect(barChartViewAction      , SIGNAL(triggered()), this, SLOT(onCircleChartViewClick()));
     connect(circleChartViewAction   , SIGNAL(triggered()), this, SLOT(onBarChartViewClick()));
 
-    QItemSelectionModel *selectionModel = treeView->selectionModel();
-
-    QModelIndex indexHomePath = dirModel->index(homePath);
-    QFileInfo fileInfo = dirModel->fileInfo(indexHomePath);
 
     //Выполняем соединения слота и сигнала который вызывается когда осуществляется выбор элемента в TreeView
+    QItemSelectionModel *selectionModel = treeView->selectionModel();
     connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
             this, SLOT(onSelectionChangedSlot(const QItemSelection &, const QItemSelection &)));
-    lastPath = homePath;
 }
 MainWindow::~MainWindow()
 {
-
+    //Удаляем конкретные объекты стратегий.
+    delete folderStrategy;
+    delete fileStrategy;
 }
 
 void MainWindow::onFileStrategyClick()
 {
-    if (listView->model() == nullptr) {
+    //qDebug() << "file strategy set\n";
 
-    } else {
-        delete fileModel;
-        fileModel = new FileExplorerModel();
-    }
-    qDebug() << "file strategy set\n";
+    //Производим смену стратегии в калькуляторе, обновляем данные в модели
     SizeCalculator::getInstance()->setCalculationStrategy(fileStrategy);
-    fileModel->updateData(lastPath);
-    listView->setModel(fileModel);
-
+    fileModel->updateData();
 }
 
 void MainWindow::onFolderStrategyClick()
 {
-    if (listView->model() == nullptr) {
-
-    } else {
-        delete fileModel;
-        fileModel = new FileExplorerModel();
-    }
-    qDebug() << "folder strategy set\n";
+    //qDebug() << "folder strategy set\n";
+    //Производим смену стратегии в калькуляторе, обновляем данные в модели
     SizeCalculator::getInstance()->setCalculationStrategy(folderStrategy);
-    fileModel->updateData(lastPath);
-    if (listView->model() == nullptr) {
-        listView->setModel(fileModel);
-    }
+    fileModel->updateData();
 }
 
 void MainWindow::onSelectionChangedSlot(const QItemSelection &selected, const QItemSelection &deselected)
 {
-    //Q_UNUSED(selected);
+
     Q_UNUSED(deselected);
-    QModelIndex index = treeView->selectionModel()->currentIndex();
+    //Получаем объект индекса выбранного элемента
     QModelIndexList indexs =  selected.indexes();
+    //Строка для записи пути до выбранного элемента
     QString filePath = "";
 
-    // Размещаем инфо в statusbar относительно выделенного модельного индекса
 
+   //записываем путь в строку
    if (indexs.count() >= 1) {
         QModelIndex ix =  indexs.constFirst();
         filePath = dirModel->filePath(ix);
    }
-
-   if (listView->model() == nullptr) {
-
-   } else {
-       delete fileModel;
-       fileModel = new FileExplorerModel();
-   }
-   qDebug() << "HERE";
+   //обновляем данные в модели
    fileModel->updateData(filePath);
-   listView->setModel(fileModel);
-   lastPath = filePath;
 }
 
+//для 3 части
 void MainWindow::onlistViewClick()
 {
     qDebug() << "list view\n";

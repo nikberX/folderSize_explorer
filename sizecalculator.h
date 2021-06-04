@@ -4,10 +4,13 @@
 
 
 //Класс-контекст для применения стратегий. Предоставляет интерфейс к функциям стратегий (посчитать размер).
+//реализован в соответствии с паттерном singletone
 class SizeCalculator
 {
 public:
+    //получить указатель на объект
     static SizeCalculator* getInstance();
+    //запрещаем копирование
     SizeCalculator(SizeCalculator&) = delete;
     void operator=(const SizeCalculator&) = delete;
     //деструтор (см. .cpp файл)
@@ -17,8 +20,10 @@ public:
     //посчитать размер в зависимости от заданной стратегии
     FileData Calculate(QString &path);
 protected:
+    //указатель на объект (единственный)
     static SizeCalculator *instance;
 private:
+    //конструктор в приватной зоне
     SizeCalculator();
     //член-данное, которое хранит указатель на абстрактную стратегию, в которую мы можем помещать конкретные стратегии
     CalculationStrategy *m_strategy;

@@ -55,11 +55,11 @@ FileData FolderStrategy::calculate(QString dirStr)
             totalSize+=folderNameMap->operator[](folder.fileName());
         }
         //Цикл по папкам в текущей директории
-        folderNameMap->operator[]("Current") = 0;
-        folderNameStringList.append("Current");
+        folderNameMap->operator[]("<Current>") = 0;
+        folderNameStringList.append("<Current>");
 
         foreach(QFileInfo file, directory.entryInfoList(QDir::NoDotAndDotDot | QDir::Files| QDir::System | QDir::Hidden )) {
-            folderNameMap->operator[]("Current") += file.size();
+            folderNameMap->operator[]("<Current>") += file.size();
             totalSize+=file.size();
         }
 
