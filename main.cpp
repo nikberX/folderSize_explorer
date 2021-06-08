@@ -10,6 +10,7 @@ SizeCalculator *SizeCalculator::instance = nullptr;
 
 int main(int argc, char *argv[])
 {
+    SizeCalculator::getInstance();
     QApplication a(argc, argv);
     MainWindow window;
     window.show();

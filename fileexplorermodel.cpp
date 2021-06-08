@@ -106,7 +106,7 @@ void FileExplorerModel::updateData(QString path)
     //сообщаем о смене данных
     beginResetModel();
     //посылаем путь в калькулятор
-    m_data = SizeCalculator::getInstance()->Calculate(lastPath);
+    m_data = SizeCalculator::getInstance()->getData();
     //сообщаем о конце смены данных
     endResetModel();
 
@@ -116,7 +116,7 @@ void FileExplorerModel::updateData()
     //сообщаем о смене данных
     beginResetModel();
     //посылаем путь в калькулятор. (если например изменилась стратегия, но не директория)
-    m_data = SizeCalculator::getInstance()->Calculate(lastPath);
+    m_data = SizeCalculator::getInstance()->getData();
     //сообщаем о конце смены данных
     endResetModel();
 }
