@@ -1,5 +1,5 @@
 QT       += core gui
-
+QT       += charts
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -11,9 +11,16 @@ CONFIG += c++11
 SOURCES += \
         Strategies/filetypestrategy.cpp \
         Strategies/folderstrategy.cpp \
+        barchart.cpp \
+        barchartadapter.cpp \
+        chart.cpp \
         fileexplorermodel.cpp \
+        fileexplorerobserver.cpp \
+        listadapter.cpp \
         main.cpp \
         mainwindow.cpp \
+        piechart.cpp \
+        piechartadapter.cpp \
         sizecalculator.cpp
 
 # Default rules for deployment.
@@ -25,7 +32,15 @@ HEADERS += \
     FileData.h \
     Strategies/filetypestrategy.h \
     Strategies/folderstrategy.h \
+    barchart.h \
+    barchartadapter.h \
     calculationstrategy.h \
+    chart.h \
+    fileexplorerlistener.h \
     fileexplorermodel.h \
+    fileexplorerobserver.h \
+    listadapter.h \
     mainwindow.h \
+    piechart.h \
+    piechartadapter.h \
     sizecalculator.h
