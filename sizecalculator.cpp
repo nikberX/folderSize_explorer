@@ -9,27 +9,39 @@ SizeCalculator *SizeCalculator::getInstance()
     return instance;
 }
 
-SizeCalculator::SizeCalculator()
+SizeCalculator::SizeCalculator() : m_data(0,QMap<QString,double>())
 {
+    observer = new FileExplorerObserver();
     m_strategy = nullptr;
 }
 //в паттерне стратегия мы не должны управлять временем жизни стратегии
 SizeCalculator::~SizeCalculator()
 {
     m_strategy = nullptr;
+    delete observer;
 }
 void SizeCalculator::setCalculationStrategy(CalculationStrategy *strategy)
 {
     m_strategy = strategy;
 }
+
+FileData SizeCalculator::getData()
+{
+    return m_data;
+}
 //посчитать размер
-FileData SizeCalculator::Calculate(QString &path) {
+void SizeCalculator::Calculate(QString &path) {
     if (m_strategy == nullptr) {
         throw std::runtime_error("No strategy is set");
     }
     try {
-        return m_strategy->calculate(path);
+        m_data = m_strategy->calculate(path);
+        observer->notify();
     } catch (std::runtime_error &exc) {
         throw exc;
     }
+}
+
+FileExplorerObserver* SizeCalculator::getObserver() {
+    return observer;
 }
