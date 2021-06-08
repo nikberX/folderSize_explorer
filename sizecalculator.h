@@ -19,7 +19,12 @@ public:
     void setCalculationStrategy(CalculationStrategy *strategy);
     //посчитать размер в зависимости от заданной стратегии
     void Calculate(QString &path);
+    //Тк класс написан с импользованием паттерна singletone то в силу того что модели данных у QChart и View
+    //То имеет смысл чтобы они имели прямой доступ к данным.
+    //после произведения вычислений (Calculate) класс сохраняет вычисленные данные и оповещает модели, что данные
+    //обноволись. Модели используют метод getData для их получения.
     FileData getData();
+    //В SizeCalculator есть объект наблюдателя, к которому надо привязать адаптеры в mainWindow. Метод для получения указателя на observer
     FileExplorerObserver* getObserver();
 protected:
     //указатель на объект (единственный)
@@ -29,7 +34,9 @@ private:
     SizeCalculator();
     //член-данное, которое хранит указатель на абстрактную стратегию, в которую мы можем помещать конкретные стратегии
     CalculationStrategy *m_strategy;
+    //Данные из метода Calculate
     FileData m_data;
+    //Наблюдатель
     FileExplorerObserver *observer;
 };
 

@@ -1,12 +1,12 @@
 #include "barchartadapter.h"
-
+#include <QDebug>
 BarChartAdapter::BarChartAdapter()
 {
+    //создаем пустую диаграмму
     chart = chartCreator.createChart();
 }
 
 void BarChartAdapter::update()
 {
-    delete chart;
     chart = chartCreator.createChart();
 }

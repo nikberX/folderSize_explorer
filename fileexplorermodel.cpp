@@ -99,23 +99,14 @@ QVariant FileExplorerModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void FileExplorerModel::updateData(QString path)
-{
-    //запоминаем новый путь
-    lastPath = path;
-    //сообщаем о смене данных
-    beginResetModel();
-    //посылаем путь в калькулятор
-    m_data = SizeCalculator::getInstance()->getData();
-    //сообщаем о конце смены данных
-    endResetModel();
 
-}
 void FileExplorerModel::updateData()
 {
     //сообщаем о смене данных
     beginResetModel();
-    //посылаем путь в калькулятор. (если например изменилась стратегия, но не директория)
+    //После добавления наблюдателя не нужно обновлять данные через mainWindow
+    //mainWindow посылает запрос калькулятору, чтобы он посчитал новый путь и после расчета калькулятор сам
+    //уведомит все модели, что данные изменились и они обновят свои данные.
     m_data = SizeCalculator::getInstance()->getData();
     //сообщаем о конце смены данных
     endResetModel();

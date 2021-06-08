@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(barChartViewAction      , SIGNAL(triggered()), this, SLOT(onCircleChartViewClick()));
     connect(circleChartViewAction   , SIGNAL(triggered()), this, SLOT(onBarChartViewClick()));
 
+    //Создаем адаптеры и добавляем их в наблюдатель
     listAdapter = new ListAdapter(fileModel);
     pieChartAdapter = new PieChartAdapter();
     barChartAdapter = new BarChartAdapter();
@@ -92,12 +93,18 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
             this, SLOT(onSelectionChangedSlot(const QItemSelection &, const QItemSelection &)));
 
+    viewNum = MainWindow::LIST;
 }
 MainWindow::~MainWindow()
 {
-    //Удаляем конкретные объекты стратегий.
+    //Удаляем конкретные объекты стратегий и адаптеры. Остальное привязано к MainWindow и удалится само.
     delete folderStrategy;
     delete fileStrategy;
+    delete listAdapter;
+    delete barChartAdapter;
+    delete pieChartAdapter;
+    delete listView;
+    delete chartView;
 }
 
 void MainWindow::onFileStrategyClick()
@@ -107,14 +114,42 @@ void MainWindow::onFileStrategyClick()
     //Производим смену стратегии в калькуляторе, обновляем данные в модели
     SizeCalculator::getInstance()->setCalculationStrategy(fileStrategy);
     SizeCalculator::getInstance()->Calculate(lastPath);
+    splitter->replaceWidget(1,listView);
+    switch (viewNum) {
+    case BAR:
+        chartView->setChart(barChartAdapter->getChart());
+        splitter->replaceWidget(1,chartView);
+        break;
+    case PIE:
+        chartView->setChart(pieChartAdapter->getChart());
+        splitter->replaceWidget(1,chartView);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::onFolderStrategyClick()
 {
     //qDebug() << "folder strategy set\n";
-    //Производим смену стратегии в калькуляторе, обновляем данные в модели
+    //Производим смену стратегии в калькуляторе, обновляем данные
     SizeCalculator::getInstance()->setCalculationStrategy(folderStrategy);
     SizeCalculator::getInstance()->Calculate(lastPath);
+    splitter->replaceWidget(1,listView);
+    switch (viewNum) {
+    case BAR:
+        chartView->setChart(barChartAdapter->getChart());
+        splitter->replaceWidget(1,chartView);
+        break;
+    case PIE:
+        delete chartView;
+        chartView = new QtCharts::QChartView();
+        chartView->setChart(pieChartAdapter->getChart());
+        splitter->replaceWidget(1,chartView);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::onSelectionChangedSlot(const QItemSelection &selected, const QItemSelection &deselected)
@@ -135,9 +170,25 @@ void MainWindow::onSelectionChangedSlot(const QItemSelection &selected, const QI
    //обновляем данные в модели
    lastPath = filePath;
    SizeCalculator::getInstance()->Calculate(filePath);
+   splitter->replaceWidget(1,listView);
+
+   switch (viewNum) {
+   case BAR:
+       barChartAdapter->update();
+       chartView->setChart(barChartAdapter->getChart());
+       splitter->replaceWidget(1,chartView);
+       break;
+   case PIE:
+       pieChartAdapter->update();
+       chartView->setChart(pieChartAdapter->getChart());
+       splitter->replaceWidget(1,chartView);
+       break;
+   default:
+       break;
+   }
 }
 
-//для 3 части
+
 void MainWindow::onlistViewClick()
 {
     listAdapter->update();
@@ -148,12 +199,13 @@ void MainWindow::onCircleChartViewClick()
     pieChartAdapter->update();
     chartView->setChart(pieChartAdapter->getChart());
     splitter->replaceWidget(1,chartView);
+    viewNum = PIE;
 }
 void MainWindow::onBarChartViewClick()
 {
-    qDebug() << "bar view\n";
     barChartAdapter->update();
     chartView->setChart(barChartAdapter->getChart());
     splitter->replaceWidget(1,chartView);
+    viewNum = BAR;
 }
 

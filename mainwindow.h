@@ -61,8 +61,16 @@ private:
     PieChartAdapter *pieChartAdapter;
     BarChartAdapter *barChartAdapter;
 
-
+    //Последний выбранные путь
     QString lastPath;
+
+    //Последнее отображение
+    int viewNum;
+    enum {
+        LIST = 1,
+        BAR  = 2,
+        PIE  = 3
+    };
 
 private slots:
     //Слоты нажатия кнопок меню

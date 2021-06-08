@@ -6,29 +6,36 @@
 #include <QBarSet>
 void BarChart::drawChart(QtCharts::QChart *chart)
 {
-    QtCharts::QBarSeries *series = new QtCharts::QBarSeries(); // создаем набор элементов данных вертикальной диаграммы
-    series->setBarWidth(1); // масштаб диаграммы, устанавливаем 100 %
-
+    //Создаем Series для BarChart
+    QtCharts::QBarSeries *series = new QtCharts::QBarSeries();
+    //Задаем размер
+    series->setBarWidth(1);
+    //получаем обновленные данные.
     FileData data = SizeCalculator::getInstance()->getData();
-
+    //Считаем категорию others
     double othersPercentage = 0;
 
     for (auto iterator = data.map.begin();iterator!=data.map.end();iterator++)
     {
-        QtCharts::QBarSet *set = new QtCharts::QBarSet(iterator.key()); // создаем элемент данных
-
-        set->append(iterator.value()); // присваиваем элементу занимаемую им долю диаграммы
-
-        series->append(set); // добавляем элемент данных в набор
+        if (iterator.key()=="others"||iterator.value()<5) {
+            othersPercentage+=iterator.value();
+        } else {
+            //Создаем элемент данных
+            QtCharts::QBarSet *set = new QtCharts::QBarSet(iterator.key());
+            //присваиваем занимаемое значение
+            set->append(iterator.value());
+            //добавляем в набор
+            series->append(set);
+        }
     }
-
+    //если есть категория others, добавляем
     if (othersPercentage > 0) {
-        QtCharts::QBarSet *set = new QtCharts::QBarSet("others"); // создаем элемент данных
+        QtCharts::QBarSet *set = new QtCharts::QBarSet("others");
 
-        set->append(othersPercentage); // присваиваем элементу занимаемую им долю диаграммы
+        set->append(othersPercentage);
 
-        series->append(set); // добавляем элемент данных в набор
+        series->append(set);
     }
-
-    chart->addSeries(series); // устанавливаем диаграмме созданный набор элементов
+    //Связываем chart и series
+    chart->addSeries(series);
 }

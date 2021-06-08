@@ -30,7 +30,6 @@ public:
     // функция возвращающая флаг о наличии потомков (требуется для универсальности модели)
     bool hasChildren(const QModelIndex &parent) const override;
     // функции для обновления данных.
-    void updateData(QString path);
     void updateData();
 private:
     //данные о подсчете
