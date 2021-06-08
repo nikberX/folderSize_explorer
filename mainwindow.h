@@ -14,6 +14,11 @@
 #include "fileexplorermodel.h"
 #include "Strategies/filetypestrategy.h"
 #include "Strategies/folderstrategy.h"
+#include "listadapter.h"
+#include "piechartadapter.h"
+#include "barchartadapter.h"
+#include <QChartView>
+#include <QSplitter>
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -22,6 +27,7 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 private:
+    QSplitter *splitter;
     //Панель меню
     QMenuBar *menuBar;
     //Объекты QMenu, добавляемые в QMenuBar. Отдельно для смены группировки и смены отображения
@@ -39,17 +45,24 @@ private:
     //Модель для данных, сгенерированных алгоритмом подсчета размера
     FileExplorerModel *fileModel;
 
+
     //вид для отображения директории
     QTreeView *treeView;
     //вид для отображения данных алгоритма
     QTableView *listView;
+    QtCharts::QChartView *chartView;
 
     //объекты конкретных стратегий
     FolderStrategy *folderStrategy;
     FileTypeStrategy *fileStrategy;
 
+    //Адаптеры
+    ListAdapter *listAdapter;
+    PieChartAdapter *pieChartAdapter;
+    BarChartAdapter *barChartAdapter;
 
 
+    QString lastPath;
 
 private slots:
     //Слоты нажатия кнопок меню

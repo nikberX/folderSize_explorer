@@ -54,11 +54,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     //создаем виджеты для отображения моделей
     treeView = new QTreeView();
     listView = new QTableView();
-
+    chartView = new QtCharts::QChartView();
     //создаем модель для отображения данных подсчета
     fileModel = new FileExplorerModel(this);
     //Виджет-контейнер для красивого размещения видов
-    QSplitter *splitter = new QSplitter(this);
+    splitter = new QSplitter(this);
 
     //привязываем модели к виду
     treeView->setModel(dirModel);
@@ -79,11 +79,19 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     connect(barChartViewAction      , SIGNAL(triggered()), this, SLOT(onCircleChartViewClick()));
     connect(circleChartViewAction   , SIGNAL(triggered()), this, SLOT(onBarChartViewClick()));
 
+    listAdapter = new ListAdapter(fileModel);
+    pieChartAdapter = new PieChartAdapter();
+    barChartAdapter = new BarChartAdapter();
+
+    SizeCalculator::getInstance()->getObserver()->subscribe(listAdapter);
+    SizeCalculator::getInstance()->getObserver()->subscribe(pieChartAdapter);
+    SizeCalculator::getInstance()->getObserver()->subscribe(barChartAdapter);
 
     //Выполняем соединения слота и сигнала который вызывается когда осуществляется выбор элемента в TreeView
     QItemSelectionModel *selectionModel = treeView->selectionModel();
     connect(selectionModel, SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)),
             this, SLOT(onSelectionChangedSlot(const QItemSelection &, const QItemSelection &)));
+
 }
 MainWindow::~MainWindow()
 {
@@ -98,7 +106,7 @@ void MainWindow::onFileStrategyClick()
 
     //Производим смену стратегии в калькуляторе, обновляем данные в модели
     SizeCalculator::getInstance()->setCalculationStrategy(fileStrategy);
-    fileModel->updateData();
+    SizeCalculator::getInstance()->Calculate(lastPath);
 }
 
 void MainWindow::onFolderStrategyClick()
@@ -106,7 +114,7 @@ void MainWindow::onFolderStrategyClick()
     //qDebug() << "folder strategy set\n";
     //Производим смену стратегии в калькуляторе, обновляем данные в модели
     SizeCalculator::getInstance()->setCalculationStrategy(folderStrategy);
-    fileModel->updateData();
+    SizeCalculator::getInstance()->Calculate(lastPath);
 }
 
 void MainWindow::onSelectionChangedSlot(const QItemSelection &selected, const QItemSelection &deselected)
@@ -125,20 +133,27 @@ void MainWindow::onSelectionChangedSlot(const QItemSelection &selected, const QI
         filePath = dirModel->filePath(ix);
    }
    //обновляем данные в модели
-   fileModel->updateData(filePath);
+   lastPath = filePath;
+   SizeCalculator::getInstance()->Calculate(filePath);
 }
 
 //для 3 части
 void MainWindow::onlistViewClick()
 {
-    qDebug() << "list view\n";
+    listAdapter->update();
+    splitter->replaceWidget(1,listView);
 }
 void MainWindow::onCircleChartViewClick()
 {
-    qDebug() << "circle view\n";
+    pieChartAdapter->update();
+    chartView->setChart(pieChartAdapter->getChart());
+    splitter->replaceWidget(1,chartView);
 }
 void MainWindow::onBarChartViewClick()
 {
     qDebug() << "bar view\n";
+    barChartAdapter->update();
+    chartView->setChart(barChartAdapter->getChart());
+    splitter->replaceWidget(1,chartView);
 }
 
