@@ -1,0 +1,1 @@
+This is implementation of simple file-explorer that calculates size of folder insides and shows result in one of three chosen formats: list, pie chart and bar chart
